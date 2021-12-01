@@ -16,7 +16,10 @@ with open("test_output_time_bleu.txt", 'r', encoding='utf-8') as infile:
         
         # time
         elif counter == 1:
-            row['time'] = line
+            
+            split = line.split('m')
+            sec = float(split[0])*60 + float(split[1].rstrip('s'))
+            row['time'] = sec
             counter += 1
         
         # bleu

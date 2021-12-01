@@ -1,5 +1,5 @@
 timebleu=output_time_bleu.txt
-for i in {1..20}
+for i in {1..30}
 do 
 
     echo 'beam size' $i
