@@ -3,6 +3,8 @@ import torch
 from itertools import count
 from queue import PriorityQueue
 
+import pdb
+
 
 class BeamSearch(object):
     """ Defines a beam search object for a single input sentence. """
@@ -64,6 +66,35 @@ class BeamSearch(object):
             nodes.put(node)
         self.nodes = nodes
 
+
+class DiverseBeamSearch(BeamSearch):
+
+    def __init__(self, beam_size, max_len, pad, n=3):
+        BeamSearch.__init__(self, beam_size, max_len, pad)
+        self.n_best = n
+
+    def get_best_n(self):
+        """ Returns final node with the lowest negative log probability """
+        # Merge EOS paths and those that were stopped by
+        # max sequence length (still in nodes)
+        merged = PriorityQueue()
+        for _ in range(self.final.qsize()):
+            node = self.final.get()
+            merged.put(node)
+
+        for _ in range(self.nodes.qsize()):
+            node = self.nodes.get()
+            merged.put(node)
+
+        nodes = []
+        # pdb.set_trace()
+        for i in range(self.n_best):
+            node = merged.get()
+            node = node[2]
+            nodes.append(node)
+
+        return nodes
+        
 
 class BeamSearchNode(object):
     """ Defines a search node and stores values important for computation of beam search path"""
