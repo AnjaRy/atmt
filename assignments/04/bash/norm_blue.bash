@@ -1,4 +1,4 @@
-alphableu=output_stats/output_norm_bleu.txt
+alphableu=assignments/04/bash/output_stats/output_norm_bleu.txt
 beamsize=13
 for i in 0.0 0.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8 0.9 1.0
 do 
