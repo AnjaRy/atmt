@@ -1,4 +1,4 @@
-timebleu=output_time_bleu.txt
+timebleu=output_stats/output_time_bleu.txt
 for i in {1..30}
 do 
 

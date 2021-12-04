@@ -2,7 +2,7 @@ import pandas as pd
 import seaborn as sns
 import matplotlib.pyplot as plt
 
-with open("output_time_bleu.txt", 'r', encoding='utf-8') as infile:
+with open("assignments/04/bash/output_stats/output_time_bleu.txt", 'r', encoding='utf-8') as infile:
     counter = 0
     rows = []
     row = {'beam_size': 0, 'bleu': 0, 'time': 0, 'bp': 0}
@@ -47,12 +47,12 @@ ax2.set(ylabel="Brevity Penality")
 ax2.yaxis.label.set_color('red')
 ax1.yaxis.label.set_color('blue')
 
-plt.savefig('plots/bleu_bp_beam_size.png')
+plt.savefig('assignments/04/plots/bleu_bp_beam_size.png')
 
 plt.figure() 
 karl = sns.lineplot(data=df, x="beam_size", y="time", marker='o')
 karl.set(xlabel='Beam Size', ylabel='Time in s')
 
-plt.savefig('plots/time_beam_size.png')
+plt.savefig('assignments/04/plots/time_beam_size.png')
 
 
