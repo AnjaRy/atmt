@@ -1,0 +1,20 @@
+QUESTION 1:
+    create a matrix where there is as many rows as there are sentence pairs in a batch, each row contains a vector of lenght one, filled with on 1
+    as a space holder for 
+
+QUESTION 2:
+    This is a buffer if one of best next candidates is the unknown token. This buffer or backup token is then used instead.
+
+
+Question 3:
+    The score returned by eval() is actually negative (negative log likelihood) and hence one has to take the "value" of the score by adding a minus before
+
+
+Question 4:
+    "add" adds the current translation path the instance variable "nodes" of the BeamSearch object. This means that this path will be looked at again to find the best next words. With "add_final" the path will be removed from "nodes" and hence this path will not be considered anymore, i.e. no further words is searched. Hence, leaving add_final away blows up the run time as, even though, the sentence is finished, the path would still be further investigated. With adding "add_final" less and less path have to be considered and hence the beam search is fast.
+
+Question 5:
+    Pruning only selects the best beam_size paths to search the next word. To be sure that only the best paths are selected the data structure PriorityQueue is used. The entries in a priority queues are ordered according to an associated value, here the total negative log probability. Hence, if some items are removed from the list as in prune, it will select the items with the highest probability, i.e. lowest negative log probability first. 
+
+QUESTION 6:
+    During the search, each finished path has been padded by default with the unk token so that each translated sentence in a batch has the same length, namely the select max_length (100 by default). This enables faster computation on the batch. While translating though this padding is removed in this for loop here.  
