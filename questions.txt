@@ -7,7 +7,7 @@ QUESTION 2:
 
 
 Question 3:
-    The score returned by eval() is actually negative (negative log likelihood) and hence one has to take the "value" of the score by adding a minus before
+    The minus turns the log probabilities into negative log probabilities (from negative to positive numbers). This means the more likely a word is the smaller is its negative likelihood; i.e. in beam search we optimize for a lowest possible negative log likelihood. This is nicely compatible with the use of PriorityQueue which gives smaller values a higher priority and hence it can be used to find the best paths while beamsearch.
 
 
 Question 4:
