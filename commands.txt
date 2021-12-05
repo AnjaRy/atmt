@@ -30,3 +30,6 @@ assignments/04/translations/translation_beam7.p.txt \
 
 # N3 best list
 python translate_beam.py --beam-size 15 --alpha 0.2 --checkpoint-path assignments/03/baseline/checkpoints/checkpoint_best.pt --output assignments/04/translations/translation_beam15_alph0.2_3n.txt --diverse-beam True --data data/en-fr/prepared --dicts data/en-fr/prepared
+
+# N3 best list with diverse search
+python translate_beam.py --beam-size 15 --alpha 0.2 --checkpoint-path assignments/03/baseline/checkpoints/checkpoint_best.pt --output assignments/04/translations/translation_beam15_alph0.2_3n.txt --diverse-beam True --data data/en-fr/prepared --dicts data/en-fr/prepared --gamma 1.0
