@@ -35,7 +35,7 @@ def get_args():
     # alpha hyperparameter for length normalization (described as lp in https://arxiv.org/pdf/1609.08144.pdf equation 14)
     parser.add_argument('--alpha', default=0.0, type=float, help='alpha for softer length normalization')
     parser.add_argument('--diverse-beam', default=False, type=bool, help='use beam search')
-    parser.add_argument('--gamma', default=0.0, type=float, help='gamma blabla')
+    parser.add_argument('--gamma', default=1.0, type=float, help='gamma blabla')
 
     return parser.parse_args()
 
@@ -81,7 +81,7 @@ def main(args):
         # Create a beam search object or every input sentence in batch
         batch_size = sample['src_tokens'].shape[0]
         if args.diverse_beam:
-            searches = [DiverseBeamSearch(args.beam_size, args.max_len - 1, tgt_dict.unk_idx) for i in range(batch_size)]
+            searches = [DiverseBeamSearch(args.beam_size, args.max_len - 1, tgt_dict.unk_idx, args.gamma) for i in range(batch_size)]
         else:
             searches = [BeamSearch(args.beam_size, args.max_len - 1, tgt_dict.unk_idx) for i in range(batch_size)]
 
@@ -156,7 +156,6 @@ def main(args):
 
             # see __QUESTION 2
             log_probs, next_candidates = torch.topk(torch.log(torch.softmax(decoder_out, dim=2)), args.beam_size+1, dim=-1)
-
             # Create number of beam_size next nodes for every current node
             for i in range(log_probs.shape[0]):
                 for j in range(args.beam_size):
@@ -232,6 +231,7 @@ def main(args):
 
     def diverse_beam_search(decoder_out):
         # __QUESTION 2: Why do we keep one top candidate more than the beam size?
+        # get first beam_size+1 best candidates
         log_probs, next_candidates = torch.topk(torch.log(torch.softmax(decoder_out, dim=2)),
                                                     args.beam_size+1, dim=-1)
         
@@ -264,7 +264,7 @@ def main(args):
         
         # Start generating further tokens until max sentence length reached
         for _ in range(args.max_len-1):
-
+            print(_)
             # Get the current nodes to expand
             nodes = [n[1] for s in searches for n in s.get_current_beams()]
             if nodes == []:
@@ -290,7 +290,10 @@ def main(args):
             log_probs, next_candidates = torch.topk(torch.log(torch.softmax(decoder_out, dim=2)), args.beam_size+1, dim=-1)
 
             # Create number of beam_size next nodes for every current node
+            
+            # iterate through sentence in batch
             for i in range(log_probs.shape[0]):
+                # iterate through beam_size options per sentence
                 for j in range(args.beam_size):
 
                     best_candidate = next_candidates[i, :, j]
@@ -316,6 +319,7 @@ def main(args):
                             node.final_cell, node.mask, torch.cat((prev_words[i][0].view([1]),
                             next_word)), node.logp, node.length
                             )
+                       
                         search.add_final(-node.eval(args.alpha), node)
 
                     # Add the node to current nodes for next iteration
@@ -325,12 +329,18 @@ def main(args):
                             node.final_cell, node.mask, torch.cat((prev_words[i][0].view([1]),
                             next_word)), node.logp + log_p, node.length + 1
                             )
+                        # print(node.sequence)
+                        # print(tgt_dict.string(node.sequence))
+                        # print(node.eval(args.alpha))
                         search.add(-node.eval(args.alpha), node)
-
+                # pdb.set_trace()
             # __QUESTION 5: What happens internally when we prune our beams?
             # How do we know we always maintain the best sequences?
+            counter =  0
             for search in searches:
+                print(counter)
                 search.prune()
+                counter +=1 
 
         # Segment into sentences
         best_sents = []

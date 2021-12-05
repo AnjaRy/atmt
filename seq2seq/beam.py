@@ -1,7 +1,9 @@
+from os import pardir
 import torch
 
 from itertools import count
 from queue import PriorityQueue
+from collections import defaultdict
 
 import pdb
 
@@ -58,6 +60,7 @@ class BeamSearch(object):
 
     def prune(self):
         """ Removes all nodes but the beam_size best ones (lowest neg log prob) """
+        pdb.set_trace()
         nodes = PriorityQueue()
         # Keep track of how many search paths are already finished (EOS)
         finished = self.final.qsize()
@@ -69,9 +72,10 @@ class BeamSearch(object):
 
 class DiverseBeamSearch(BeamSearch):
 
-    def __init__(self, beam_size, max_len, pad, n=3):
+    def __init__(self, beam_size, max_len, pad, gamma, n=3):
         BeamSearch.__init__(self, beam_size, max_len, pad)
         self.n_best = n
+        self.gamma = gamma
 
     def get_best_n(self):
         """ Returns final node with the lowest negative log probability """
@@ -94,6 +98,40 @@ class DiverseBeamSearch(BeamSearch):
             nodes.append(node)
 
         return nodes
+    
+    def prune(self):
+        """ Removes all nodes but the beam_size best ones (lowest neg log prob) """
+        diversified_nodes = PriorityQueue()
+        common_parent = {}
+        # Keep track of how many search paths are already finished (EOS)
+        for _ in range(self.nodes.qsize()):
+            # change tuple to list so that probability can be changed
+            # node: [6.134, 75, <seq2seq.beam.BeamSearchNode object at 0x7f743075f910>]
+            node = list(self.nodes.get())
+            parent = int(node[2].sequence[-2])
+            # current rank of sibling
+            try:
+                sibling_rank = common_parent[parent]
+            except KeyError:
+                common_parent[parent] = 1
+                sibling_rank = 1
+            prob = node[0]
+            new_prob = prob + sibling_rank*self.gamma
+            node[0] = new_prob
+            diversified_nodes.put(tuple(node))
+            
+            # increase sibling counter
+            common_parent[parent] += 1
+        
+        nodes = PriorityQueue()
+        finished = self.final.qsize()
+
+        # Keep track of how many search paths are already finished (EOS)
+        for _ in range(self.beam_size-finished):
+            node = diversified_nodes.get()
+            nodes.put(node)
+        
+        self.nodes = nodes
         
 
 class BeamSearchNode(object):
