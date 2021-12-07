@@ -60,7 +60,6 @@ class BeamSearch(object):
 
     def prune(self):
         """ Removes all nodes but the beam_size best ones (lowest neg log prob) """
-        pdb.set_trace()
         nodes = PriorityQueue()
         # Keep track of how many search paths are already finished (EOS)
         finished = self.final.qsize()
